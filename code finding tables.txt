@@ -1,0 +1,35 @@
+l=['cdm.party','abc.test1','abc.test2',
+'abc.test3_balances'
+']
+
+import os
+rootdir=('/dbfs/FileStore/cdm-v2-hive/notebooks/')
+file_obj = open("/dbfs/FileStore/cdm-v2-hive/cdm_Inventory.txt", "w")
+count=0
+for folder, dirs, files in os.walk(rootdir):
+    for file in files:
+        if file.lower().endswith('.py'):
+            fullpath = os.path.join(folder, file)
+            with open(fullpath, 'r') as f:
+                for line in f:
+                    for i in l:
+                    #if any(x in line.lower() for x in l):
+                      if i in line.lower() :#and line.lower() not in ('cdm.codemaster','cdm.codeclassfications')  :
+                          matchline=line.lower()
+                          matchline=matchline.replace("'","~")
+                          matchlinefirst=matchline[:1]
+                          matchlinetwo=matchline[:2]
+                          # print(matchlinestart, '   ', matchlinetwo )
+                          if matchlinefirst !='#' and matchlinetwo!='--':
+                            # print(str(count)+i+fullpath)
+                            # file_obj.write(i+' '+ fullpath+'\n')
+                            count=count+1
+                            print(count)
+                            tab="insert into cdm.cdm_usage_inventory values('"+fullpath+"','"+i+"','"+matchline+"')"
+                            spark.sql(tab)
+                          break
+                          #with open ("Desktop\file.txt","w) as f:
+                          #file_obj.write(fullpath)
+print(count)
+                        
+
